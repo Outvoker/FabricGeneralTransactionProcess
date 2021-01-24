@@ -1,0 +1,101 @@
+
+name: logReading
+version: 1
+
+info:
+  separator: '\|@\|'    # the separator between log data items
+  filePath: './...'   # file path (should be modified)
+
+sender:         # sending policy, merge multiple logs into one transaction when the following conditions are met
+  time: 60000  # time interval(seconds), setting to 0 means there is no time interval limit
+  size: 10000    # transaction size(KB), setting to 0 means there is no transaction size limit
+  num: 10000     # number of logs in each transaction, setting to 0 means there is no log number limit in each transaction
+
+handler:
+  mergedDependence:   # merging based on this item
+    - commodityid
+
+  originalItem:   # data items in the logs
+    - tradeno
+    - belonger
+    - commodityid
+    - name
+    - orderno
+    - bsflag
+    - osflag
+    - price
+    - quantity
+    - tradefunds
+    - tradefee
+    - tradetype
+    - tradetime
+    - oppbelonger
+
+  filteredItem:   # the items which should be assigned
+    -
+      field: Time
+      item: tradetime
+      type: String
+      rule: first
+    -
+      field: CommodityInnerID
+      item: commodityid
+      type: String
+      rule: first
+    -
+      field: FirstPrice
+      item: price
+      type: Double
+      rule: first
+    -
+      field: HighPrice
+      item: price
+      type: Double
+      rule: max
+    -
+      field: LowPrice
+      item: price
+      type: Double
+      rule: min
+    -
+      field: LastPrice
+      item: price
+      type: Double
+      rule: last
+    -
+      field: TotalMoney
+      item: tradefunds
+      type: Double
+      rule: sum
+    -
+      field: TotalAmount
+      item: quantity
+      type: Int
+      rule: sum
+    -
+      field: TradeDate
+      item: tradetime
+      type: String
+      rule: first   # 日期格式YYYY-MM-DD
+    -
+      field: AveragePrice
+      item: price
+      type: Double
+      rule: average
+
+  mergedItem:  # the items which should be merged
+    - tradeno
+
+  mergedItemRule: multi  # the way of merging, ​​including "single" and "multi"
+
+
+  collectionName:     # the policy of collection name
+    prefix:
+      - "QSD_1MinData_"
+    fields:
+      - CommodityInnerID
+
+  keyPolicy:             # the policy of key name
+    id: "userId"
+    fields:
+      - CommodityInnerID
